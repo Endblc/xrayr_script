@@ -21,12 +21,38 @@ print_step() {
     echo ""
 }
 
+# --- 检测1Panel或宝塔环境 ---
+check_control_panels() {
+    # 检测1Panel
+    if [[ -d "/opt/1panel" ]] || [[ -f "/usr/local/bin/1panel" ]] || systemctl list-unit-files | grep -q "1panel"; then
+        echo "检测到1Panel环境，此脚本与1Panel不兼容，安装取消。"
+        exit 1
+    fi
+    
+    # 检测宝塔
+    if [[ -d "/www/server/panel" ]] || [[ -f "/etc/init.d/bt" ]] || systemctl list-unit-files | grep -q "bt"; then
+        echo "检测到宝塔环境，此脚本与宝塔不兼容，安装取消。"
+        exit 1
+    fi
+    
+    # 检测aapanel(宝塔国际版)
+    if [[ -d "/www/server/panel" ]] || [[ -f "/etc/init.d/aaPanel" ]] || systemctl list-unit-files | grep -q "aaPanel"; then
+        echo "检测到aaPanel环境，此脚本与aaPanel不兼容，安装取消。"
+        exit 1
+    fi
+}
+
 # --- 前置检查 ---
 # 1. 检查脚本是否以 root 权限运行
 if [[ $EUID -ne 0 ]]; then
    echo "错误：此脚本必须以 root 身份运行"
    exit 1
 fi
+
+# 2. 检查控制面板环境
+print_step "检查系统环境"
+check_control_panels
+echo "未检测到不兼容的控制面板环境，继续安装..."
 
 # --- 用户输入与确认 ---
 # 循环直到获取到有效的输入
@@ -117,7 +143,6 @@ read -p "信息是否正确？按 Enter 继续，按 Ctrl+C 取消..."
 
     print_step "安装成功！"
     echo "所有服务已配置并重启"
-
 
 } | tee -a "$ERROR_LOG"
 
