@@ -84,8 +84,8 @@ read -p "信息是否正确？按 Enter 继续，按 Ctrl+C 取消..."
     # 使用 -fSsl 选项：-f 会在服务器错误时静默失败（但 set -e 会捕获），-S 显示错误，-s 静默模式，-L 跟随重定向
     curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/nginx/nginx.conf "${CONFIG_BASE_URL}/nginx.conf"
     curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/XrayR/config.yml "${CONFIG_BASE_URL}/config.yml"
-    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/XrayR/nanodesu.key "${CONFIG_BASE_URL}/nanodesu.key"
-    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/XrayR/Certificate.crt "${CONFIG_BASE_URL}/Certificate.crt"
+    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/XrayR/kanata.key "${CONFIG_BASE_URL}/kanata.key"
+    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/XrayR/kanata.crt "${CONFIG_BASE_URL}/kanata.crt"
     curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/sysctl.conf "${CONFIG_BASE_URL}/sysctl.conf"
     
     # 检查关键配置文件是否下载成功
