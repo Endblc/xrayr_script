@@ -112,7 +112,7 @@ read -p "信息是否正确？按 Enter 继续，按 Ctrl+C 取消..."
     print_step "8. 应用 sysctl 配置 (忽略错误)"
     # 临时禁用 set -e 以忽略 sysctl -p 的错误
     set +e
-    sysctl -p
+    sysctl -p -q
     set -e
 
     print_step "安装成功！"
