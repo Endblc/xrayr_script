@@ -96,22 +96,28 @@ read -p "信息是否正确？按 Enter 继续，按 Ctrl+C 取消..."
     
     echo "所有配置文件下载成功。"
     
-    print_step "6. 设置安全权限并应用配置"
+    print_step "6. 设置安全权限并更新配置文件"
     echo "为私钥文件设置安全权限 (600)..."
     chmod 600 /etc/XrayR/nanodesu.key
     
-    echo "应用 sysctl 配置..."
-    sysctl -p
-
-    print_step "7. 根据用户输入更新配置文件"
+    echo "根据用户输入更新配置文件..."
     sed -i "20s/Values/$PANEL_ID/g" /etc/XrayR/config.yml
     sed -i "79s/fake/$DOMAIN/g" /etc/XrayR/config.yml
     echo "配置文件变量替换完成。"
 
+    print_step "7. 重启服务"
+    systemctl restart nginx
+    xrayr restart
+
+    print_step "8. 应用 sysctl 配置 (忽略错误)"
+    # 临时禁用 set -e 以忽略 sysctl -p 的错误
+    set +e
+    sysctl -p
+    set -e
+
     print_step "安装成功！"
-    echo "建议重启 Nginx 和 XrayR 服务以应用所有更改。"
-    echo "systemctl restart nginx"
-    echo "systemctl restart XrayR"
+    echo "所有服务已配置并重启"
+
 
 } | tee -a "$ERROR_LOG"
 
