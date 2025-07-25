@@ -98,7 +98,7 @@ read -p "信息是否正确？按 Enter 继续，按 Ctrl+C 取消..."
     
     print_step "6. 设置安全权限并更新配置文件"
     echo "为私钥文件设置安全权限 (600)..."
-    chmod 600 /etc/XrayR/nanodesu.key
+    chmod 600 /etc/XrayR/kanata.key
     
     echo "根据用户输入更新配置文件..."
     sed -i "20s/Values/$PANEL_ID/g" /etc/XrayR/config.yml
