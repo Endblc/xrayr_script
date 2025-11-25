@@ -105,8 +105,10 @@ EOF
     sysctl --system
     echo "IPv6 已禁用。"
 
-    print_step "3. 安装 XrayR"
-    wget -N https://raw.githubusercontent.com/XrayR-project/XrayR-release/master/install.sh && bash install.sh
+    print_step "3. 安装 V2bX"
+    # 下载脚本并自动输入 n (对应安装完成后的提示)
+    wget -N https://raw.githubusercontent.com/wyx2685/V2bX-script/master/install.sh 
+    echo "n" | bash install.sh
 
     print_step "4. 安装并配置 Nginx"
     curl -sS https://nginx.org/keys/nginx_signing.key | gpg --dearmor > /usr/share/keyrings/nginx-archive-keyring.gpg
@@ -119,31 +121,38 @@ EOF
     systemctl daemon-reload
 
     print_step "5. 下载项目配置文件"
+    # Nginx 配置
     curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/nginx/nginx.conf "${CONFIG_BASE_URL}/nginx.conf"
-    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/XrayR/config.yml "${CONFIG_BASE_URL}/config.yml"
-    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/XrayR/kanata.key "${CONFIG_BASE_URL}/kanata.key"
-    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/XrayR/kanata.crt "${CONFIG_BASE_URL}/kanata.crt"
     
-    if [[ ! -s "/etc/XrayR/config.yml" ]]; then
-        echo "错误：/etc/XrayR/config.yml 下载失败或为空文件！"
+    # V2bX 配置 (下载 v2bx.json 存为 config.json)
+    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/V2bX/config.json "${CONFIG_BASE_URL}/v2bx.json"
+    
+    # 证书文件
+    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/V2bX/kanata.key "${CONFIG_BASE_URL}/kanata.key"
+    curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/V2bX/kanata.crt "${CONFIG_BASE_URL}/kanata.crt"
+    
+    if [[ ! -s "/etc/V2bX/config.json" ]]; then
+        echo "错误：/etc/V2bX/config.json 下载失败或为空文件！"
         exit 1
     fi
     echo "核心服务配置文件下载成功。"
     
     print_step "6. 设置安全权限并更新配置文件"
     echo "为私钥文件设置安全权限 (600)..."
-    chmod 600 /etc/XrayR/kanata.key
+    chmod 600 /etc/V2bX/kanata.key
     
     echo "更新配置文件变量..."
-    sed -i "20s/Values/$PANEL_ID/g" /etc/XrayR/config.yml
-    sed -i "79s/fake/$DOMAIN/g" /etc/XrayR/config.yml
+    # 替换第22行的 #### 为 面板ID
+    sed -i "22s/####/$PANEL_ID/g" /etc/V2bX/config.json
+    # 替换第55行的 #### 为 域名
+    sed -i "55s/####/$DOMAIN/g" /etc/V2bX/config.json
     echo "配置文件变量替换完成。"
 
     print_step "7. 重启服务"
     echo "重启 Nginx..."
     systemctl restart nginx
-    echo "重启 XrayR..."
-    xrayr restart
+    echo "重启 V2bX..."
+    v2bx restart
     
     # --- 网络优化步骤 (根据用户选择执行) ---
     if [ "$ENABLE_NET_OPT" = true ]; then
