@@ -143,9 +143,9 @@ EOF
     
     echo "更新配置文件变量..."
     # 替换第22行的 #### 为 面板ID
-    sed -i "22s/####/$PANEL_ID/g" /etc/V2bX/config.json
+    sed -i "20s/####/$PANEL_ID/g" /etc/V2bX/config.json
     # 替换第55行的 #### 为 域名
-    sed -i "55s/####/$DOMAIN/g" /etc/V2bX/config.json
+    sed -i "53s/####/$DOMAIN/g" /etc/V2bX/config.json
     echo "配置文件变量替换完成。"
 
     print_step "7. 重启服务"
