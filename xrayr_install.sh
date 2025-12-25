@@ -58,7 +58,7 @@ while true; do
     echo "" 
     
     # 询问是否进行网络优化
-    read -p "是否在安装完成后进行网络优化 (sysctl配置)? [y/N]: " OPT_NET_INPUT
+    read -p "是否在安装完成后进行网络优化 (运行优化脚本)? [y/N]: " OPT_NET_INPUT
     
     # 处理网络优化选项 (默认为 No)
     if [[ "$OPT_NET_INPUT" =~ ^[yY](es)?$ ]]; then
@@ -156,28 +156,19 @@ EOF
     
     # --- 网络优化步骤 (根据用户选择执行) ---
     if [ "$ENABLE_NET_OPT" = true ]; then
-        print_step "8. 执行网络优化 (sysctl)"
+        print_step "8. 执行网络优化"
+        echo "正在调用第三方网络优化脚本..."
         
-        if [ -f "/etc/sysctl.conf" ]; then
-            echo "备份原 sysctl.conf 到 sysctl.conf.bak ..."
-            cp /etc/sysctl.conf /etc/sysctl.conf.bak
-        fi
-
-        echo "下载网络优化配置..."
-        curl -fSsL --header "Authorization: Bearer $TOKEN" -o /etc/sysctl.conf "${CONFIG_BASE_URL}/sysctl.conf"
-        
-        echo "应用 sysctl 配置..."
-        # 临时禁用 set -e，防止因某些特定内核参数不支持导致脚本报错
-        set +e 
-        # 使用 --system 确保同时加载刚才创建的禁用IPv6配置和新下载的配置
-        sysctl --system
-        EXIT_CODE=$?
+        # 临时禁用 set -e，防止外部脚本的非标准退出码中断本脚本
+        set +e
+        bash <(curl -sL https://raw.githubusercontent.com/yahuisme/network-optimization/main/script.sh)
+        OPT_EXIT_CODE=$?
         set -e
         
-        if [ $EXIT_CODE -eq 0 ]; then
-            echo "网络优化应用成功。"
+        if [ $OPT_EXIT_CODE -eq 0 ]; then
+            echo "网络优化脚本执行结束。"
         else
-            echo "网络优化部分参数应用失败，已忽略错误（IPv6禁用配置依然生效）。"
+            echo "注意：网络优化脚本返回了非零状态码 ($OPT_EXIT_CODE)，请检查上方输出确认是否生效。"
         fi
     else
         print_step "8. 跳过网络优化"
